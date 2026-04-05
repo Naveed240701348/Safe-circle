@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">SafeCircle</string>
+    <string name="login_title">Welcome Back</string>
+    <string name="login_subtitle">Sign in to your account</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="login_button">Login</string>
+    <string name="register_button">Register</string>
+    <string name="register_title">Create Account</string>
+    <string name="register_subtitle">Join SafeCircle today</string>
+    <string name="name_hint">Full Name</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="already_have_account">Already have an account? Login</string>
+    <string name="dont_have_account">Don\'t have an account? Register</string>
+    <string name="sos_button">SOS</string>
+    <string name="friends_title">My Friends</string>
+    <string name="add_friend_title">Add Friend</string>
+    <string name="search_friend_hint">Search by email</string>
+    <string name="send_request_button">Send Request</string>
+    <string name="logout_button">Logout</string>
+    <string name="emergency_alert_sent">Emergency alert sent to all friends!</string>
+    <string name="location_permission_required">Location permission is required for SOS feature</string>
+    <string name="notification_permission_required">Notification permission is required</string>
+    <string name="friend_request_sent">Friend request sent!</string>
+    <string name="friend_added">Friend added successfully!</string>
+    <string name="user_not_found">User not found</string>
+    <string name="invalid_email">Invalid email format</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="login_failed">Login failed. Please check your credentials</string>
+    <string name="registration_failed">Registration failed. Please try again</string>
+</resources>
