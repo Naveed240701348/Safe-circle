@@ -21,16 +21,24 @@ import coil.compose.AsyncImage
 import com.safecircle.data.model.User
 import com.safecircle.ui.viewmodel.DashboardViewModel
 
+import com.safecircle.ui.viewmodel.SOSViewModel
+import java.text.SimpleDateFormat
+import java.util.*
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
+    sosViewModel: SOSViewModel,
     onNavigateToSOS: () -> Unit,
     onNavigateToFriends: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onLogout: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val sosHistory by sosViewModel.sosHistory.collectAsState()
+    
+    var showHistory by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -78,38 +86,107 @@ fun DashboardScreen(
                 StatCard(
                     modifier = Modifier.weight(1f),
                     title = "SOS Sent",
-                    value = uiState.alertCount.toString(),
+                    value = sosHistory.size.toString(),
                     icon = Icons.Default.History,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    onClick = {} // Could navigate to history
+                    onClick = { showHistory = !showHistory }
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "Quick Friends List",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else if (uiState.friends.isEmpty()) {
-                EmptyFriendsView(onNavigateToFriends)
-            } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(bottom = 80.dp)
-                ) {
-                    items(uiState.friends) { friend ->
-                        FriendItem(friend)
+            if (showHistory) {
+                Text(
+                    text = "SOS History",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                if (sosHistory.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No SOS alerts sent yet", color = MaterialTheme.colorScheme.outline)
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        items(sosHistory) { event ->
+                            SOSHistoryItem(event)
+                        }
                     }
                 }
+                
+                TextButton(
+                    onClick = { showHistory = false },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text("Show Friends List")
+                }
+            } else {
+                Text(
+                    text = "Quick Friends List",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (uiState.isLoading) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                } else if (uiState.friends.isEmpty()) {
+                    EmptyFriendsView(onNavigateToFriends)
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        items(uiState.friends) { friend ->
+                            FriendItem(friend)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SOSHistoryItem(event: Map<String, Any>) {
+    val timestamp = event["timestamp"] as? Long ?: 0
+    val date = SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault()).format(Date(timestamp))
+    val friendsNotified = event["friendsNotified"] as? Long ?: 0
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = "SOS Alert Sent", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                Text(text = date, style = MaterialTheme.typography.bodySmall)
+                Text(text = "Notified $friendsNotified friends", style = MaterialTheme.typography.bodySmall)
+            }
+            
+            IconButton(onClick = {
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                    data = android.net.Uri.parse(event["locationLink"].toString())
+                }
+                context.startActivity(intent)
+            }) {
+                Icon(Icons.Default.Map, contentDescription = "View Location", tint = MaterialTheme.colorScheme.primary)
             }
         }
     }

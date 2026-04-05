@@ -72,6 +72,16 @@ class AuthViewModel : ViewModel() {
             _updateProfileState.value = UpdateProfileState.Error("Name cannot be empty")
             return
         }
+        
+        if (newName.length < 3) {
+            _updateProfileState.value = UpdateProfileState.Error("Name must be at least 3 characters")
+            return
+        }
+
+        if (age < 12 || age > 120) {
+            _updateProfileState.value = UpdateProfileState.Error("Please enter a valid age (12-120)")
+            return
+        }
 
         _updateProfileState.value = UpdateProfileState.Loading
         

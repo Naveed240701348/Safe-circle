@@ -99,6 +99,21 @@ class FriendRepository {
     }
 
     /**
+     * Decline (delete) friend request
+     */
+    suspend fun declineFriendRequest(requestId: String): Result<Unit> {
+        return try {
+            firestore.collection("friendRequests")
+                .document(requestId)
+                .delete()
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Get current user's friends
      */
     suspend fun getFriends(): Result<List<User>> {

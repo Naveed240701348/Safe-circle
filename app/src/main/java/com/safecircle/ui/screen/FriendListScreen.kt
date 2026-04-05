@@ -109,7 +109,9 @@ fun FriendListScreen(
                                 onAccept = { 
                                     friendViewModel.acceptFriendRequest("${request.fromUserId}_${request.toUserId}") 
                                 },
-                                onDecline = { /* Optional: implement decline */ }
+                                onDecline = { 
+                                    friendViewModel.declineFriendRequest("${request.fromUserId}_${request.toUserId}") 
+                                }
                             )
                         }
                         item {

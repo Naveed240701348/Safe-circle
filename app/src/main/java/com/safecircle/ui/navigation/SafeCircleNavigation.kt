@@ -81,6 +81,7 @@ fun SafeCircleNavigation(
             
             DashboardScreen(
                 viewModel = dashboardViewModel,
+                sosViewModel = sosViewModel,
                 onNavigateToSOS = {
                     navController.navigate("sos")
                 },

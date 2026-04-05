@@ -146,6 +146,26 @@ class FriendViewModel : ViewModel() {
     }
 
     /**
+     * Decline friend request
+     */
+    fun declineFriendRequest(requestId: String) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            val result = friendRepository.declineFriendRequest(requestId)
+            result.fold(
+                onSuccess = {
+                    _errorMessage.value = null
+                    loadFriendRequests() // Refresh requests list
+                },
+                onFailure = { exception ->
+                    _errorMessage.value = exception.message ?: "Failed to decline friend request"
+                }
+            )
+            _isLoading.value = false
+        }
+    }
+
+    /**
      * Clear search result
      */
     fun clearSearchResult() {

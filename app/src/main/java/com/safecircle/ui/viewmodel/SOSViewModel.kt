@@ -30,8 +30,27 @@ class SOSViewModel : ViewModel() {
 
     private var alertListener: com.google.firebase.firestore.ListenerRegistration? = null
 
+    private val _sosHistory = MutableStateFlow<List<Map<String, Any>>>(emptyList())
+    val sosHistory: StateFlow<List<Map<String, Any>>> = _sosHistory
+
     init {
         startListeningForAlerts()
+        loadSOSHistory()
+    }
+
+    /**
+     * Load SOS history for current user
+     */
+    fun loadSOSHistory() {
+        viewModelScope.launch {
+            val result = sosRepository.getSOSHistory()
+            result.fold(
+                onSuccess = { history ->
+                    _sosHistory.value = history
+                },
+                onFailure = { /* Handle error if needed */ }
+            )
+        }
     }
 
     private var listenerStartTime: Long = 0
@@ -171,6 +190,7 @@ class SOSViewModel : ViewModel() {
                 result.fold(
                     onSuccess = {
                         _sosState.value = SOSState.Success(location)
+                        loadSOSHistory() // Refresh history
                     },
                     onFailure = { exception ->
                         _sosState.value = SOSState.Error(exception.message ?: "Failed to send SOS alert")
