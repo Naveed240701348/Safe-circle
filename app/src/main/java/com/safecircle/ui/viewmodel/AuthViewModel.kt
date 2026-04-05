@@ -28,6 +28,9 @@ class AuthViewModel : ViewModel() {
     private val _imageUploadState = MutableStateFlow<ImageUploadState>(ImageUploadState.Idle)
     val imageUploadState: StateFlow<ImageUploadState> = _imageUploadState
 
+    private val _isDarkMode = MutableStateFlow(false)
+    val isDarkMode: StateFlow<Boolean> = _isDarkMode
+
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser
 
@@ -180,6 +183,13 @@ class AuthViewModel : ViewModel() {
                 }
             )
         }
+    }
+
+    /**
+     * Toggle dark mode
+     */
+    fun toggleTheme() {
+        _isDarkMode.value = !_isDarkMode.value
     }
 
     /**

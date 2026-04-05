@@ -2,6 +2,8 @@ package com.safecircle.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -74,6 +76,8 @@ fun SafeCircleNavigation(
         // Dashboard Screen
         composable("dashboard") {
             val dashboardViewModel: DashboardViewModel = viewModel()
+            val isDarkMode by authViewModel.isDarkMode.collectAsState()
+            
             // Refresh data whenever we navigate to dashboard
             LaunchedEffect(Unit) {
                 dashboardViewModel.loadDashboardData()
@@ -82,6 +86,10 @@ fun SafeCircleNavigation(
             DashboardScreen(
                 viewModel = dashboardViewModel,
                 sosViewModel = sosViewModel,
+                isDarkMode = isDarkMode,
+                onToggleTheme = {
+                    authViewModel.toggleTheme()
+                },
                 onNavigateToSOS = {
                     navController.navigate("sos")
                 },
