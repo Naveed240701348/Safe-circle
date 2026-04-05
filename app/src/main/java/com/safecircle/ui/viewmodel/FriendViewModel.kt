@@ -166,6 +166,26 @@ class FriendViewModel : ViewModel() {
     }
 
     /**
+     * Remove a friend
+     */
+    fun removeFriend(friendId: String) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            val result = friendRepository.removeFriend(friendId)
+            result.fold(
+                onSuccess = {
+                    _errorMessage.value = null
+                    loadFriends() // Refresh friends list
+                },
+                onFailure = { exception ->
+                    _errorMessage.value = exception.message ?: "Failed to remove friend"
+                }
+            )
+            _isLoading.value = false
+        }
+    }
+
+    /**
      * Clear search result
      */
     fun clearSearchResult() {

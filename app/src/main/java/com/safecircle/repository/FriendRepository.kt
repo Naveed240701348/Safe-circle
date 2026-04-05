@@ -114,6 +114,30 @@ class FriendRepository {
     }
 
     /**
+     * Remove a friend
+     */
+    suspend fun removeFriend(friendId: String): Result<Unit> {
+        return try {
+            val currentUserId = auth.currentUser?.uid ?: throw Exception("User not logged in")
+            
+            // Delete friendship from both sides
+            firestore.collection("friends")
+                .document("${currentUserId}_${friendId}")
+                .delete()
+                .await()
+            
+            firestore.collection("friends")
+                .document("${friendId}_${currentUserId}")
+                .delete()
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Get current user's friends
      */
     suspend fun getFriends(): Result<List<User>> {

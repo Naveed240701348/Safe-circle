@@ -134,7 +134,10 @@ fun FriendListScreen(
                             )
                         }
                         items(friends) { friend ->
-                            FriendItem(friend = friend)
+                            FriendItem(
+                                friend = friend,
+                                onRemove = { friendViewModel.removeFriend(friend.userId) }
+                            )
                         }
                     }
                 }
@@ -252,7 +255,10 @@ private fun FriendRequestItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FriendItem(friend: User) {
+private fun FriendItem(
+    friend: User,
+    onRemove: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
@@ -329,12 +335,14 @@ private fun FriendItem(friend: User) {
                 }
             }
 
-            Icon(
-                imageVector = Icons.Default.VerifiedUser,
-                contentDescription = "Verified Friend",
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
-            )
+            IconButton(onClick = onRemove) {
+                Icon(
+                    imageVector = Icons.Default.DeleteOutline,
+                    contentDescription = "Remove Friend",
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
