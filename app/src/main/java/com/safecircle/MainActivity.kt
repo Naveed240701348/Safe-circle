@@ -19,6 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.Priority
+import android.content.IntentSender
 import com.safecircle.repository.AuthRepository
 import com.safecircle.ui.navigation.SafeCircleNavigation
 import com.safecircle.ui.theme.SafeCircleTheme
@@ -47,6 +53,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // Permission launcher for location
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+        
+        if (!fineLocationGranted && !coarseLocationGranted) {
+            Toast.makeText(
+                this,
+                "Location permission is required for SOS features",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -60,6 +82,9 @@ class MainActivity : ComponentActivity() {
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+
+        // Request location permissions
+        requestLocationPermissions()
 
         // Get FCM token
         getFCMToken()
@@ -79,6 +104,49 @@ class MainActivity : ComponentActivity() {
                         authViewModel = authViewModel,
                         sosViewModel = sosViewModel
                     )
+                }
+            }
+        }
+    }
+
+    private fun requestLocationPermissions() {
+        val permissions = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+        
+        val needsRequest = permissions.any {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (needsRequest) {
+            locationPermissionLauncher.launch(permissions)
+        } else {
+            // If permissions are already granted, ensure GPS is turned on
+            checkLocationSettings()
+        }
+    }
+
+    private fun checkLocationSettings() {
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+            .setMinUpdateIntervalMillis(5000)
+            .build()
+
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+            .setAlwaysShow(true)
+
+        val client = LocationServices.getSettingsClient(this)
+        val task = client.checkLocationSettings(builder.build())
+
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    exception.startResolutionForResult(this, 1001)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
                 }
             }
         }
