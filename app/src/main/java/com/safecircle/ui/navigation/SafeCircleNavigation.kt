@@ -99,6 +99,9 @@ fun SafeCircleNavigation(
                 onNavigateToProfile = {
                     navController.navigate("profile")
                 },
+                onNavigateToPrecautions = {
+                    navController.navigate("precautions")
+                },
                 onLogout = {
                     authViewModel.logout()
                     navController.navigate("login") {
@@ -166,6 +169,15 @@ fun SafeCircleNavigation(
         composable("profile") {
             ProfileScreen(
                 authViewModel = authViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Precautions Screen
+        composable("precautions") {
+            PrecautionsScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

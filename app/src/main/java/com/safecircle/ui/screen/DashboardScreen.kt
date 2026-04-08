@@ -38,6 +38,7 @@ fun DashboardScreen(
     onNavigateToSOS: () -> Unit,
     onNavigateToFriends: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToPrecautions: () -> Unit,
     onLogout: () -> Unit,
     onToggleTheme: () -> Unit,
     isDarkMode: Boolean
@@ -55,38 +56,73 @@ fun DashboardScreen(
                         "SafeCircle", 
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1
                     ) 
                 },
                 actions = {
-                    IconButton(
-                        onClick = onToggleTheme,
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                    ) {
-                        Icon(
-                            if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
-                            contentDescription = "Toggle Theme"
-                        )
-                    }
-                    IconButton(
-                        onClick = onNavigateToProfile,
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                    ) {
-                        Icon(Icons.Default.Person, contentDescription = "Profile")
-                    }
-                    IconButton(
-                        onClick = onLogout,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f))
-                    ) {
-                        Icon(Icons.Default.Logout, contentDescription = "Logout", tint = MaterialTheme.colorScheme.error)
+                    var showMenu by remember { mutableStateOf(false) }
+                    
+                    Box {
+                        IconButton(
+                            onClick = { showMenu = true },
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                        }
+                        
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Profile Settings") },
+                                onClick = {
+                                    showMenu = false
+                                    onNavigateToProfile()
+                                },
+                                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Safety Precautions") },
+                                onClick = {
+                                    showMenu = false
+                                    onNavigateToPrecautions()
+                                },
+                                leadingIcon = { Icon(Icons.Default.Shield, contentDescription = null) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(if (isDarkMode) "Light Mode" else "Dark Mode") },
+                                onClick = {
+                                    showMenu = false
+                                    onToggleTheme()
+                                },
+                                leadingIcon = { 
+                                    Icon(
+                                        if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode, 
+                                        contentDescription = null 
+                                    ) 
+                                }
+                            )
+                            Divider(modifier = Modifier.padding(vertical = 4.dp))
+                            DropdownMenuItem(
+                                text = { Text("Logout", color = MaterialTheme.colorScheme.error) },
+                                onClick = {
+                                    showMenu = false
+                                    onLogout()
+                                },
+                                leadingIcon = { 
+                                    Icon(
+                                        Icons.Default.Logout, 
+                                        contentDescription = null, 
+                                        tint = MaterialTheme.colorScheme.error 
+                                    ) 
+                                }
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
