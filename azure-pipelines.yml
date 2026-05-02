@@ -8,14 +8,31 @@ steps:
 - script: echo "Pipeline started"
   displayName: 'Start message'
 
+# Install Java
 - task: JavaToolInstaller@0
   inputs:
     versionSpec: '17'
     jdkArchitectureOption: 'x64'
     jdkSourceOption: 'PreInstalled'
 
-- script: chmod +x ./gradlew
-  displayName: 'Give permission'
+# Install Gradle manually
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y gradle
+  displayName: 'Install Gradle'
 
-- script: ./gradlew assembleDebug
+# Build APK
+- script: gradle assembleDebug
   displayName: 'Build APK'
+
+# Copy APK
+- task: CopyFiles@2
+  inputs:
+    contents: '**/*.apk'
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+# Publish APK
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'APK'
